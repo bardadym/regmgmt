@@ -69,7 +69,7 @@ function SetRegistryKey($farm, $baseKey, $keyPath, $key, $value, [Microsoft.Win3
     foreach($server in $farm)
     {
         [string]$serverName = $server.Name
-		if (($serverName -ne $thisServerName) -and ($serverName -ne "ariasptestdb")) 
+		if ($serverName -ne $thisServerName) 
 		{
 			Write-Host -foregroundcolor DarkGray -NoNewline "Updating registry on" $serverName
 
