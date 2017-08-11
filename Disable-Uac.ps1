@@ -20,7 +20,7 @@ Function Load-SharePoint-PowerShell
 {
 	If ((Get-PsSnapin |?{$_.Name -eq "Microsoft.SharePoint.PowerShell"})-eq $null)
 	{
-    	Write-Host -ForegroundColor White " - Loading SharePoint PowerShell snap-in"
+		Write-Host -ForegroundColor White " - Loading SharePoint PowerShell snap-in"
 		Add-PsSnapin Microsoft.SharePoint.PowerShell -ErrorAction Stop
 	}
 }
@@ -32,22 +32,22 @@ Function Load-SharePoint-PowerShell
 #<param name="$serviceName">Service name.</param>
 function ServiceIsRunning($serverName, $serviceName)
 {
-    try {
-        $service = Get-Service $serviceName -ComputerName $serverName
+	try {
+		$service = Get-Service $serviceName -ComputerName $serverName
 		if ($service -eq $null) 
 		{
-            Write-Host "Service" $serviceName "not found on server" $serverName -foregroundcolor Red
-            $false
-        }
-        else 
+			Write-Host "Service" $serviceName "not found on server" $serverName -foregroundcolor Red
+			$false
+		}
+		else 
 		{
-            $service.Status -eq "Running"
-        }
-    }
-    catch 
+			$service.Status -eq "Running"
+		}
+	}
+	catch 
 	{
-        $false
-    }
+		$false
+	}
 }
 
 #<summary>
@@ -63,54 +63,54 @@ function ServiceIsRunning($serverName, $serviceName)
 #<param name="$timeout">Timeout in seconds to check the readiness of the server qfter the restart</param>
 function SetRegistryKey($farm, $baseKey, $keyPath, $key, $value, [Microsoft.Win32.RegistryValueKind]$type, $restart, $timeout)
 {
-    [string]$thisServerName = $env:COMPUTERNAME
+	[string]$thisServerName = $env:COMPUTERNAME
 
-    # Iterate through each server in the farm, and each service in each server
-    foreach($server in $farm)
-    {
-        [string]$serverName = $server.Name
+	# Iterate through each server in the farm, and each service in each server
+	foreach($server in $farm)
+	{
+		[string]$serverName = $server.Name
 		if ($serverName -ne $thisServerName) 
 		{
 			Write-Host -foregroundcolor DarkGray -NoNewline "Updating registry on" $serverName
 
-            $reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey($baseKey, $serverName) 
-            $regKey= $reg.OpenSubKey($keyPath, $true) 
-            $regKey.SetValue($key, $value, $type)
-            if ($restart) 
+			$reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey($baseKey, $serverName) 
+			$regKey= $reg.OpenSubKey($keyPath, $true) 
+			$regKey.SetValue($key, $value, $type)
+			if ($restart) 
 			{ 
 				Write-Host -foregroundcolor DarkGray -NoNewline "Restarting server" $serverName
-            	Restart-Computer -ComputerName $serverName -Force
+				Restart-Computer -ComputerName $serverName -Force
                 
-                # Wait until the computer will reply on Test-Connection
-                do 
-                {
-                    Write-Host "Waiting the server"  $serverName "to restart." -ForegroundColor Yellow
-                    Start-Sleep -seconds $timeout
-                    $serverIsUp = Test-Connection -ComputerName $serverName -BufferSize 16 -Count 1 -Quiet 
-                }
-                until ($serverIsUp)
+				# Wait until the computer will reply on Test-Connection
+				do 
+				{
+					Write-Host "Waiting the server"  $serverName "to restart." -ForegroundColor Yellow
+					Start-Sleep -seconds $timeout
+					$serverIsUp = Test-Connection -ComputerName $serverName -BufferSize 16 -Count 1 -Quiet 
+				}
+				until ($serverIsUp)
                 
-                # Wait until SharePoint services will start on the computer; SharePoint Timer and WWW Publishing services
-                do 
-                {
-                    Write-Host "Waiting services to start on the server"  $serverName -ForegroundColor Yellow
-                    Start-Sleep -seconds $timeout
-                    $servicesAreUp = (ServiceIsRunning $serverName "SPTimerV4") -and (ServiceIsRunning $serverName "W3SVC")
-                }
-                until ($servicesAreUp)
-            }
+				# Wait until SharePoint services will start on the computer; SharePoint Timer and WWW Publishing services
+				do 
+				{
+					Write-Host "Waiting services to start on the server"  $serverName -ForegroundColor Yellow
+					Start-Sleep -seconds $timeout
+					$servicesAreUp = (ServiceIsRunning $serverName "SPTimerV4") -and (ServiceIsRunning $serverName "W3SVC")
+				}
+				until ($servicesAreUp)
+			}
 		}
-    }
-    Write-Host -foregroundcolor DarkGray -NoNewline "Updating registry on this server" $thisServerName
-    $reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey($baseKey, $thisServerName) 
-    $regKey= $reg.OpenSubKey($keyPath, $true) 
-    $regKey.SetValue($key, $value, $type)
+	}
+	Write-Host -foregroundcolor DarkGray -NoNewline "Updating registry on this server" $thisServerName
+	$reg = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey($baseKey, $thisServerName) 
+	$regKey= $reg.OpenSubKey($keyPath, $true) 
+	$regKey.SetValue($key, $value, $type)
 
-    if ($restart) 
+	if ($restart) 
 	{ 
 		Write-Host -foregroundcolor DarkGray -NoNewline "Restarting this server" $thisServerName
-    	Restart-Computer -ComputerName $thisServerName -Force
-    }
+		Restart-Computer -ComputerName $thisServerName -Force
+	}
 }
 
 #**************************************************************************************
@@ -118,7 +118,7 @@ function SetRegistryKey($farm, $baseKey, $keyPath, $key, $value, [Microsoft.Win3
 #**************************************************************************************
 
 # Load SharePoint PowerShell snap-in
-Load-SharePoint-Powershell
+Load-SharePoint-PowerShell
 
 # Get the local farm instance
 $farm = Get-SPServer | where {$_.Role -match "Application"}
