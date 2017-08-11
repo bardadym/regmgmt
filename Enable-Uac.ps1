@@ -32,7 +32,8 @@ Function Load-SharePoint-PowerShell
 #<param name="$serviceName">Service name.</param>
 function ServiceIsRunning($serverName, $serviceName)
 {
-	try {
+	try 
+	{
 		$service = Get-Service $serviceName -ComputerName $serverName
 		if ($service -eq $null) 
 		{
